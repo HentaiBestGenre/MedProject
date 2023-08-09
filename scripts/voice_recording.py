@@ -28,6 +28,5 @@ async def send_bytes():
                 "frames": encoded_frames, 
                 "sample_width": sample_width
             }))
-
-
+            
 asyncio.get_event_loop().run_until_complete(send_bytes())

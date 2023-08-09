@@ -28,8 +28,11 @@ router = APIRouter()
 data = []
 
 
+# GET and POST endpoints for patient sessions 
+
+
 @router.get("/{id}")
-async def get_profile(id: str, visiting_repo = Depends(get_visiting_repo)):
+async def get_visiting(id: str, visiting_repo = Depends(get_visiting_repo)):
     visit = await visiting_repo.get(id)
     return JSONResponse(
         status_code=status.HTTP_200_OK, 
@@ -40,6 +43,10 @@ async def get_profile(id: str, visiting_repo = Depends(get_visiting_repo)):
 
 @router.post("/")
 async def create(visit: Visit, visiting_repo: UserRepository = Depends(get_visiting_repo)):
+    # resive json {
+    #   "entities": [str],
+    #   "text": [str]
+    # }
     visit = await visiting_repo.create(visit)
     return JSONResponse(
         status_code=status.HTTP_201_CREATED, 
