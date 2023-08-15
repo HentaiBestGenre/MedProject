@@ -1,6 +1,10 @@
 from fastapi import status, WebSocket
 from fastapi.exceptions import HTTPException
 
+import spacy
+from spacy.training import Example
+import pickle
+
 
 class WebsocketManager:
     """
@@ -81,3 +85,75 @@ class WebsocketManager:
     async def send_message_on_desctop(self, message: dict, id: str):
         # send message from mobile client side to desctop
         await self.send_message(message, id, "desctop")
+
+
+class NERManager:
+    """
+    Manager for operating websocket connections beetwin desctop and mobile apps
+    Contains info about active sessions
+    """
+    connections = {}
+
+    def __init__(self, NER_PATH, MATCHER_PATH) -> None:
+        self.NER_PATH = NER_PATH
+        self.MATCHER_PATH = MATCHER_PATH
+        self.nlp = spacy.load(NER_PATH)
+        self.matcher = pickle.load(open(MATCHER_PATH, 'rb'))
+
+
+    def extract_entities(self, text):
+        doc = self.nlp(text)
+        matches = self.matcher(doc)
+        
+        for match_id, start, end in matches:
+            print(self.nlp.vocab.strings[match_id], doc[start:end])
+            
+            
+        entities = [(
+            ent.text, ent.label_
+        ) for ent in doc.ents] + [(
+            doc[start:end].text, self.nlp.vocab.strings[match_id]
+        ) for match_id, start, end in matches]
+        return entities
+    
+
+    def add_matcher_patern(patern, lable):
+        pass
+
+    
+    def fine_tuning(self, train_data: list, iterations = 5):
+        """
+        Take data in format: [
+        (
+            'text',
+            {'entities': [
+                (start_index, end_index, 'lable'), 
+                (start_index, end_index, 'lable'), 
+                (start_index, end_index, 'lable')
+            ]}
+        )
+        ]
+        """
+
+        ner = self.nlp.get_pipe("ner")
+
+        for _, annotations in train_data:
+            for ent in annotations.get("entities"):
+                ner.add_label(ent[2])
+
+        other_pipes = [pipe for pipe in self.nlp.pipe_names if pipe != "ner"]
+        with self.nlp.disable_pipes(*other_pipes):
+            optimizer = self.nlp.begin_training()
+            for _ in range(iterations):
+                losses = {}
+                examples = [
+                    Example.from_dict(self.nlp.make_doc(text), annotations) 
+                    for text, annotations in train_data
+                ]
+                self.nlp.update(examples, drop=0.5, losses=losses)
+            print(losses)
+        return ner
+    
+
+    def save_ner(self, path):
+        self.nlp.to_disk(path)

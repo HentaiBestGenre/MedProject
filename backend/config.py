@@ -1,7 +1,9 @@
 NER_PATH = "./App/neural_networks/NER"
+NER_PATH = "/home/vadim/Projects/MedProject/backend/App/neural_networks/NER"
+MATCHER_PATH = "./App/neural_networks/NER/matcher_symptoms.sav"
+MATCHER_PATH = "/home/vadim/Projects/MedProject/backend/App/neural_networks/NER/matcher_symptoms.sav"
 WAVE_OUTPUT_FILENAME = "./data/output_files/{0}.wav"
-# NER_PATH = "/home/vadim/Projects/MedProject/backend/App/neural_networks/NER"
-# WAVE_OUTPUT_FILENAME = "/home/vadim/Projects/MedProject/backend/data/output_files/{0}.wav"
+WAVE_OUTPUT_FILENAME = "/home/vadim/Projects/MedProject/backend/data/output_files/{0}.wav"
 CHANNELS = 1
 RATE = 44100  # is based on your mic
 MONGO_DB_URL = 'mongodb://localhost:27017/'
